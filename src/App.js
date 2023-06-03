@@ -38,6 +38,33 @@ class App extends WebrcadeRetroApp {
     return appProps.threedo_bios;
   }
 
+  async fetchBios(bios, biosMap = null, alternateBiosMap = null) {
+    const { appProps, emulator } = this;
+
+    const biosBuffers = await super.fetchBios(bios, null, null);
+
+    const fonts = appProps.threedo_fonts;
+    if (fonts) {
+      const fontsMap = {
+        "b8dc97f778a6245c58e064b0312e8281": "panafz1-kanji.bin"
+      }
+      const altFontsMap = {
+        "428577250f43edc902ea239c50d2240d": "panafz10ja-anvil-kanji.bin",
+        "c23fb5d5e6bb1c240d02cf968972be37": "panafz1j-kanji.bin"
+      }
+
+      try {
+        const fontBuffers = await super.fetchBios([fonts], fontsMap, altFontsMap);
+        emulator.setFontBios(fontBuffers);
+      } catch (e) {
+        console.error(e)
+        console.warn("Unable to load font bios: " + fonts);
+      }
+    }
+
+    return biosBuffers;
+  }
+
   renderPauseScreen() {
     const { appProps, emulator } = this;
 

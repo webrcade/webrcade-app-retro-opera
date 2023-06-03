@@ -2,9 +2,9 @@ import React from 'react';
 import { Component } from 'react';
 
 import { GamepadControlsTab, KeyboardControlsTab } from './controls';
+import { ThreedoSettingsEditor } from './settings';
 
 import {
-  AppSettingsEditor,
   CustomPauseScreen,
   EditorScreen,
   GamepadWhiteImage,
@@ -149,7 +149,7 @@ export class EmulatorPauseScreen extends Component {
         ) : null}
 
         {mode === ModeEnum.SETTINGS ? (
-          <AppSettingsEditor
+          <ThreedoSettingsEditor
             emulator={emulator}
             onClose={closeCallback}
           />
