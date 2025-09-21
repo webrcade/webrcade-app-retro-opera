@@ -11,6 +11,8 @@ import {
   TelevisionWhiteImage,
   GamepadWhiteImage,
   Select,
+  BlurImage,
+  ShaderSettingsTab,
   // Switch,
   WebrcadeContext,
 } from '@webrcade/app-common';
@@ -28,15 +30,20 @@ export class ThreedoSettingsEditor extends Component {
   componentDidMount() {
     const { emulator } = this.props;
 
+    const values = {
+      origBilinearMode: emulator.getPrefs().isBilinearEnabled(),
+      bilinearMode: emulator.getPrefs().isBilinearEnabled(),
+      origScreenSize: emulator.getPrefs().getScreenSize(),
+      screenSize: emulator.getPrefs().getScreenSize(),
+      controllerCount: emulator.getControllerCount(),
+      // ejectInsert: false
+    };
+
+    this.shaderService = this.props.emulator.getShadersService();
+    this.shaderService.addEditorValues(values);
+
     this.setState({
-      values: {
-        origBilinearMode: emulator.getPrefs().isBilinearEnabled(),
-        bilinearMode: emulator.getPrefs().isBilinearEnabled(),
-        origScreenSize: emulator.getPrefs().getScreenSize(),
-        screenSize: emulator.getPrefs().getScreenSize(),
-        controllerCount: emulator.getControllerCount(),
-        // ejectInsert: false
-      },
+      values: values
     });
   }
 
@@ -55,7 +62,7 @@ export class ThreedoSettingsEditor extends Component {
     return (
       <EditorScreen
         showCancel={true}
-        onOk={() => {
+        onOk={async () => {
           // emulator.setAnalogMode(values.analogMode ? 1 : 0);
           // emulator.setSwapControllers(values.swapControllers);
           // emulator.setEjectInsert(values.ejectInsert);
@@ -75,6 +82,10 @@ export class ThreedoSettingsEditor extends Component {
           if (updated) {
             emulator.getPrefs().save();
           }
+
+          // Set the shader
+          await this.shaderService.setShader(values.shaderId);
+
           onClose();
         }}
         onClose={onClose}
@@ -106,6 +117,20 @@ export class ThreedoSettingsEditor extends Component {
                 setValues={setValues}
               />
             ),
+          },
+          {
+            image: BlurImage,
+            label: 'Shader Settings',
+            content: (
+              <ShaderSettingsTab
+                shaderService={this.shaderService}
+                emulator={emulator}
+                isActive={tabIndex === 2}
+                setFocusGridComps={setFocusGridComps}
+                values={values}
+                setValues={setValues}
+              />
+            )
           },
         ]}
       />
