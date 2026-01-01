@@ -3,6 +3,7 @@ import {
   Controllers,
   KeyCodeToControlMapping,
   RetroAppWrapper,
+  ScriptAudioProcessor,
   CIDS,
   KCODES,
   LOG,
@@ -20,6 +21,63 @@ export class Emulator extends RetroAppWrapper {
 
     // Allow game saves to persist after loading state
     this.saveManager.setDisableGameSaveOnStateLoad(false);
+
+    this.lastFrequency = 60;
+    this.frequency = 60;
+
+    this.audioStarted = 0;
+
+    this.total = 0;
+    this.count = 0;
+    this.audioCallback = (offset, length) => {
+      this.total += length;
+      this.count = this.count + 1;
+
+      if (this.count === 60) {
+        //console.log("total: " + this.total);
+        this.total = 0;
+        this.count = 0;
+      }
+
+      length = length << 1;
+      const audioArray = new Int16Array(window.Module.HEAP16.buffer, offset, length);
+      this.audioProcessor.storeSoundCombinedInput(audioArray, 2, length, 0, 32768);
+    };
+  }
+
+  createAudioProcessor() {
+    return new ScriptAudioProcessor(
+      2,
+      44100,
+      8192 + 4096,
+      2048
+    ).setDebug(this.debug);
+  }
+
+  onFrame() {
+    if (this.audioStarted !== -1) {
+      if (this.audioStarted > 1) {
+        this.audioStarted = -1;
+        // Start the audio processor
+        this.audioProcessor.start();
+      } else {
+        this.audioStarted++;
+      }
+    }
+  }
+
+  setRate(rate) {
+    console.log("## Rate: " + rate);
+    this.frequency = rate;
+  }
+
+  getDisplayLoopReturn() {
+    if (this.lastFrequency !== this.frequency) {
+      this.lastFrequency = this.frequency;
+      console.log('returning: ' + this.frequency);
+      return this.frequency;
+    }
+    return undefined;
   }
 
   GAME_SRAM_NAME = 'game.0.srm';
