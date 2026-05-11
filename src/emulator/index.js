@@ -112,6 +112,10 @@ export class Emulator extends RetroAppWrapper {
     this.fontBios = b;
   }
 
+  getHashFileExtension() {
+    return 'chd';
+  }
+
   getScriptUrl() {
     return 'js/opera_libretro.js';
   }
