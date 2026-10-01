@@ -206,6 +206,7 @@ export class EmulatorPauseScreen extends Component {
           <ThreedoSettingsEditor
             emulator={emulator}
             onClose={closeCallback}
+            showOnScreenControls={true}
           />
         ) : null}
         {mode === ModeEnum.CHEATS ? (
